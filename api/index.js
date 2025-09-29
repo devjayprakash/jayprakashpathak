@@ -35,9 +35,16 @@ async function createServer(root = process.cwd()) {
   return { app };
 }
 
-let app;
-createServer().then((result) => {
-  app = result.app;
-});
+let appPromise;
 
-module.exports = app;
+function getApp() {
+  if (!appPromise) {
+    appPromise = createServer().then((result) => result.app);
+  }
+  return appPromise;
+}
+
+module.exports = async (req, res) => {
+  const app = await getApp();
+  return app(req, res);
+};
